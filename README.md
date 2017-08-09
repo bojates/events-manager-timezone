@@ -59,7 +59,7 @@ It assumes the WordPress timezone is set to London, and this default is in the c
  - We could probably grab the WordPress timezone and make it available to the JavaScript without requiring user configuration 
  - It's possible we could put the template overrides in this plugin folder, rather than the theme folder
 
-## Instalation
+## Installation
 ### 1. Install the relevant plugins
 In WordPress, install and activate Events Manager and then install and activate this Plugin. I suggest using folder name ``events-manager-timezones``.
 
