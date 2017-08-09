@@ -28,23 +28,25 @@ It appends the contents of the select with the list of timezones at the end of t
 On change, it sets a cookie (and one is set as default).
 It checks for the cookie when the script is called.
 
-### Replacing values on calendar and events listing
+#### Replacing values on calendar and events listing
 It expects Events Manager to give it dates in this format (the li is an example. Can be any tag, including span.)
 
 ```
-<li class='eventdatetime' data-eventstart="#c" data-eventend="#@c">#_EVENTLINK
-<span class="eventdates">#_EVENTDATES</span>
-<span class="eventtime">#_EVENTTIMES</span></li>
+<li class='eventdatetime' data-eventstart="#c" data-eventend="#@c">
+  #_EVENTLINK
+  <span class="eventdates">#_EVENTDATES</span>
+  <span class="eventtime">#_EVENTTIMES</span>
+</li>
 ```
 It uses the data values to get the times, and replaces the values in the eventdates and eventtime spans.
 
 #### Replacing the values on the event addition page
 It looks for the start and end times on the form, and adds timezone translations next to it.
 
-Events Manager is not aware of timezone, and doesn't store in UTC, so you need to translate from the current WP timezone.
+Events Manager is not aware of timezone, and doesn't store in UTC, so we need to translate from the current WP timezone.
 
 #### Replacing values on the edit events page
-The edit events template needs replacing with one that embeds the correct data (details of how to do this are below). It then replaces in the same way as the calendar and events page.
+The edit events template needs replacing with one that embeds the complete datetime data (details of how to do this are below). It then replaces in the same way as the calendar and events page.
 
 ### Defaults
 It assumes the WordPress timezone is set to London, and this default is in the code twice.
@@ -52,6 +54,10 @@ It assumes the WordPress timezone is set to London, and this default is in the c
 ### Known bugs
  - In calendar view, if the timezone adjustment means a date change, this isn't honoured.
  - Not all the BuddyPress and Events templates that might show times have been identified.
+
+### Possible improvements to the plugin
+ - We could probably grab the WordPress timezone and make it available to the JavaScript without requiring user configuration 
+ - It's possible we could put the template overrides in this plugin folder, rather than the theme folder
 
 ## Instalation
 ### 1. Install the relevant plugins
