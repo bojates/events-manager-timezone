@@ -3,30 +3,46 @@ jQuery(document).ready(function() {
   /*
     Settings
   */
-  var defaultTimeZone = 'Europe/London'; // Should be the same as the WP timezone
+  var defaultTimeZone = 'Europe/London'; // Should be the same as the WP timezone.
   var displayDefaultTimeZone = 'London'; // The name of the timezone to appear on the events entry page.
+
+/*
+  Functions not requiring jQuery
+*/
+
+function setTimeZone(timezone) {
+    var timezone = timezone;
+    Cookies.set('user-timezone', timezone);
+}
+
+function setDefaultTimeZone() {
+    var timezone = 'Europe/London'; // <- Should match your WP timezone.
+    setTimeZone(timezone);
+    return timezone;
+}
+
+function getTimeZone() {
+    if (Cookies.get('user-timezone')) {
+        var timezone = Cookies.get('user-timezone');
+    } else {
+        var timezone = setDefaultTimeZone();
+    };
+    return timezone;
+}
 
   /*
     Functions using jQuery
   */
   // Function to refresh the dates and times on the page according to timezone
   // Assumes a 'timezone' is set
-  var refreshTimes = (function() {
-    // Find eventdatetimes - this is how we style our events
+  var displayTimes = (function() {
     jQuery(".eventdatetime").each(function() {
 
       var dataStart = jQuery(this).data('eventstart').substring(0,19);
       var dataEnd = jQuery(this).data('eventend').substring(0,19);
-      // Data for start and end is attached to the eventdatetimes class
-      // console.log(dataStart);
-      // console.log(dataEnd);
-      // console.log(defaultTimeZone);
-      var eventStart = moment.tz(dataStart, defaultTimeZone);
-      var eventEnd = moment.tz(dataEnd, defaultTimeZone);
 
-      // Translate to the given timezone
-      var timezoneStart = eventStart.clone().tz(timezone);
-      var timezoneEnd = eventEnd.clone().tz(timezone);
+      var timezoneStart = moment.tz(dataStart, timezone);
+      var timezoneEnd = moment.tz(dataEnd, timezone);
 
       // These are our display placeholders
       var displayDate = jQuery(this).find('.eventdates');
@@ -42,8 +58,7 @@ jQuery(document).ready(function() {
       // Format the time
       if (timezoneStart.isSame(timezoneEnd, 'minute')) {
         var timeToDisplay = timezoneStart.format('h:mm a z');
-      // } else if ('0:00' == eventStart.tz('UTC').format('H:mm') && '23:59' == eventEnd.tz('UTC').format('H:mm')) {
-      } else if ('0:00' == eventStart.format('H:mm') && '23:59' == eventEnd.format('H:mm')) {
+      } else if ('0:00' == timezoneStart.format('H:mm') && '23:59' == timezoneEnd.format('H:mm')) {
         var timeToDisplay = 'all day';
       } else {
         var timeToDisplay = timezoneStart.format('h:mm a') + ' - ' + timezoneEnd.format('h:mm a z');
@@ -57,6 +72,7 @@ jQuery(document).ready(function() {
       // console.log(timeDisplay);
     });
   });
+
 
   // Function to build our timezone picker
   var populateTimeZonePicker = (function() {
@@ -78,7 +94,7 @@ jQuery(document).ready(function() {
     The actual work starts here
   */
   var timezone = getTimeZone(); // Get from Cookie, or sets default
-  refreshTimes(); // resets the times on the page using the local timezone
+  displayTimes(); // shows the times on the page with the set timezone
   populateTimeZonePicker();
 
   /*
@@ -104,8 +120,6 @@ jQuery(document).ready(function() {
     var startMoment = moment.tz(jQuery(this).val(), 'HH:mm a', defaultTimeZone);
     var tzfieldstart = startMoment.clone().tz(timezone).format('HH:mm z');
 
-    // console.log(jQuery(this).val());
-
     // Chuck it in the page
     jQuery('.tztranslatorStart').remove();
     jQuery(this).after("<span class='tztranslatorStart'> (" + tzfieldstart + ")</span>");
@@ -121,44 +135,26 @@ jQuery(document).ready(function() {
     jQuery(this).after("<span class='tztranslatorEnd'> (" + tzfieldend + ")</span>");
   });
 
+  // Remove the option to create 'all day' events
+  jQuery("p.em-time-range").replaceText(/All day/, "");
+  jQuery('#em-time-all-day').hide();
+
   /* Event display pages */
   // Watch for timezone changes, and reset cookie, and reset times on page
   jQuery('select.timezonepicker').change(function() {
     setTimeZone(jQuery( ".timezonepicker" ).val());
     timezone = getTimeZone();
-    refreshTimes();
+    location.reload(true);
+    displayTimes();
   });
 
   // Watch for Ajax refresh on the calendar and refresh times if we need to
   jQuery(document).ajaxSuccess(function() {
-      refreshTimes();
+      displayTimes();
     });
 
 });
 
-/*
-  Functions not requiring jQuery
-*/
-
-function setTimeZone(timezone) {
-    var timezone = timezone;
-    Cookies.set('user-timezone', timezone);
-}
-
-function setDefaultTimeZone() {
-    var timezone = 'Europe/London';
-    setTimeZone(timezone);
-    return timezone;
-}
-
-function getTimeZone() {
-    if (Cookies.get('user-timezone')) {
-        var timezone = Cookies.get('user-timezone');
-    } else {
-        var timezone = setDefaultTimeZone();
-    };
-    return timezone;
-}
 
 // Our hash of timezones to list on the page. From:
 // https://github.com/anamartinez/js-cldr-timezones/blob/master/lib/assets/javascripts/js_cldr/en_GB_cldr_timezones.js
@@ -288,3 +284,5 @@ var en_GB_cldr_timezones_hash = {
     "Pacific/Auckland":"(GMT+13:00) Auckland",
     "Pacific/Tongatapu":"(GMT+13:00) Tongatapu"
 };
+
+
