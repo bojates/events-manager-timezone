@@ -30,7 +30,15 @@ It appends the contents of the select with the list of timezones at the end of t
 On change, it sets a cookie (and one is set as default).
 It checks for the cookie when the script is called.
 
-#### Replacing values on calendar and events listing
+#### Applying the new timezone
+The plugin adds hooks that latch on to em_get_event and em_events_get_array. These events are translated into the timezone in the cookie, and Events Manager then treats them as normal. 
+
+#### Replacing the values on the event addition page
+It looks for the start and end times on the form, and adds timezone translations next to it.
+
+Events Manager is not aware of timezone, and doesn't store in UTC, so we need to translate from the current WP timezone to help people enter their events properly.
+
+#### Replacing values on calendar and events listing (for showing which timezone you're in)
 It expects Events Manager to give it dates in this format (the li is an example. Can be any tag, including span.)
 
 ```
@@ -42,16 +50,11 @@ It expects Events Manager to give it dates in this format (the li is an example.
 ```
 It uses the data values to get the times, and replaces the values in the eventdates and eventtime spans.
 
-#### Replacing the values on the event addition page
-It looks for the start and end times on the form, and adds timezone translations next to it.
-
-Events Manager is not aware of timezone, and doesn't store in UTC, so we need to translate from the current WP timezone.
-
-#### Replacing values on the edit events page
+#### Replacing values on the edit events page (for showing which timezone you're in)
 The edit events template needs replacing with one that embeds the complete datetime data (details of how to do this are below). It then replaces in the same way as the calendar and events page.
 
 ### Defaults
-It assumes the WordPress timezone is set to London, but it's possible to change.
+It assumes the WordPress timezone is set to London, but it's possible to change (details below).
 
 ### Known bugs
  - Not all the BuddyPress and Events templates that might show times have been identified.
