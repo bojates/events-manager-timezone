@@ -16,6 +16,9 @@ function emtz_default_timezone() {
 
 function emtz_filter_em_get_event($event) {
 
+    if ($event->tz_manipulated == true) {
+        return $event;
+    }
     $new_event_dates = emtz_translate_event_timezone($event->start_date,
                                $event->start_time,
                                $event->end_date,
@@ -32,6 +35,9 @@ function emtz_filter_em_get_event($event) {
     $event->end_time = $event->event_end_time = $new_event_dates[4];
     $event->end = $new_event_dates[5];
 
+    // Only manipulate each object once
+    $event->tz_manipulated = true;
+
     return $event;
 }
 
@@ -39,28 +45,29 @@ function emtz_filter_em_events_get_array($events) {
 
     foreach($events as $e) {
 
-        $new_info = emtz_translate_event_timezone($e['event_start_date'],
-                                   $e['event_start_time'],
-                                   $e['event_end_date'],
-                                   $e['event_end_time'],
-                                   emtz_default_timezone(),
-                                   $_COOKIE['user-timezone'],
-                                   $e['event_all_day']);
+        if ($e['tz_manipulated'] == true) {
+            $retevents[] = $e;
+        } else {
+            $new_info = emtz_translate_event_timezone($e['event_start_date'],
+                                       $e['event_start_time'],
+                                       $e['event_end_date'],
+                                       $e['event_end_time'],
+                                       emtz_default_timezone(),
+                                       $_COOKIE['user-timezone'],
+                                       $e['event_all_day']);
 
-        $e['start_date'] = $e['event_start_date'] = $new_info[0];
-        $e['start_time'] = $e['event_start_time'] = $new_info[1];
-        $e['start'] = $new_info[2];
+            $e['start_date'] = $e['event_start_date'] = $new_info[0];
+            $e['start_time'] = $e['event_start_time'] = $new_info[1];
+            $e['start'] = $new_info[2];
 
-        $e['end_date'] = $e['event_end_date'] = $new_info[3];
-        $e['end_time'] = $e['event_end_time'] = $new_info[4];
-        $e['end'] = $new_info[5];
+            $e['end_date'] = $e['event_end_date'] = $new_info[3];
+            $e['end_time'] = $e['event_end_time'] = $new_info[4];
+            $e['end'] = $new_info[5];
+            $e['tz_manipulated'] = true;
 
-        $retevents[] = $e;
+            $retevents[] = $e;
+        }
     }
-
-    // print '<pre>';
-    // print_r($retevents);
-    // print '</pre>';
 
     return $retevents;
 }
@@ -72,7 +79,8 @@ function emtz_translate_event_timezone($start_date, $start_time,
                                   $all_day = false) {
 
     // Return original values if we've not been given a timezone
-    if ($target_time_zone == '') {
+    // Or if our original and target are the same
+    if ($target_time_zone == '' || ($original_time_zone == $target_time_zone)) {
         $start_timestamp = strtotime($start_date . 'T' . $start_time);
         $end_timestamp = strtotime($end_date . 'T' . $end_time);
 
@@ -110,8 +118,31 @@ function emtz_translate_event_timezone($start_date, $start_time,
 
 }
 
-add_filter('em_get_event', 'emtz_filter_em_get_event');
-add_filter('em_events_get_array', 'emtz_filter_em_events_get_array');
+function add_filter_once( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+    global $_gambitFiltersRan;
+
+    if ( ! isset( $_gambitFiltersRan ) ) {
+        $_gambitFiltersRan = array();
+    }
+
+    // Since references to $this produces a unique id, just use the class for identification purposes
+    $idxFunc = $function_to_add;
+    if ( is_array( $function_to_add ) ) {
+        $idxFunc[0] = get_class( $function_to_add[0] );
+    }
+    $idx = _wp_filter_build_unique_id( $tag, $idxFunc, $priority );
+
+    if ( ! in_array( $idx, $_gambitFiltersRan ) ) {
+        add_filter( $tag, $function_to_add, $priority, $accepted_args );
+    }
+
+    $_gambitFiltersRan[] = $idx;
+
+    return true;
+}
+
+add_filter_once('em_get_event', 'emtz_filter_em_get_event');
+add_filter_once('em_events_get_array', 'emtz_filter_em_events_get_array');
 
 // global $Events_Manager_TimeZones;
 

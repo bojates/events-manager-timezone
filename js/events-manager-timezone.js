@@ -1,11 +1,3 @@
-jQuery(document).ready(function() {
-
-  /*
-    Settings
-  */
-  var defaultTimeZone = 'Europe/London'; // Should be the same as the WP timezone.
-  var displayDefaultTimeZone = 'London'; // The name of the timezone to appear on the events entry page.
-
 /*
   Functions not requiring jQuery
 */
@@ -29,6 +21,16 @@ function getTimeZone() {
     };
     return timezone;
 }
+
+
+jQuery(document).ready(function() {
+
+  /*
+    Settings
+  */
+  var defaultTimeZone = 'Europe/London'; // Should be the same as the WP timezone.
+  var displayDefaultTimeZone = 'London'; // The name of the timezone to appear on the events entry page.
+
 
   /*
     Functions using jQuery
