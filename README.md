@@ -2,15 +2,19 @@
 Author: Jemima Kingsley, jemima@websitedepartment.co.uk
 
 ## Description
-Events Manager is a great plugin for WordPress which lets you create events either in the front or back end, and display them in a list, in calendar view, and in individual pages. It integrates, if desired, with BuddyPress groups.
+Events Manager is a WordPress plugin which lets you create events either in the front or back end, and display them in a list, in calendar view, and in individual pages. It integrates, if desired, with BuddyPress groups.
 
-However, it only operates in the timezone that WordPress is setup in and is not timezone aware.
+For an international membership site, I had a requirement to show the events in timezones local to the user. 
+
+Events Manager now has a timezone option, which lets you store the event timezone with the event, but I have not been able to get it to return all the events in a timezone that's passed in. 
 
 This plugin uses the Moment Timezone javascript library to intercept the times and dates on the pages, and display them in a timezone of the user's choosing (which is remembered using a cookie).
 
 Fundamentally, this plugin:
 1. Adds a timezone picker to the page and stores the user option in a cookie.
 2. Finds and replaces the times and dates on the page to match the given timezone.
+
+(A previous version of this plugin manipulated the dates in Events Manager, but this became increasingly complicated and broke the bookings functionality.)
 
 ### Requirements
   - [Events Manager](http://wp-events-plugin.com/), obviously:
@@ -43,8 +47,6 @@ It uses the data values to get the times, and replaces the values in the eventda
 #### Replacing the values on the event addition page
 It looks for the start and end times on the form, and adds timezone translations next to it.
 
-Events Manager is not aware of timezone, and doesn't store in UTC, so we need to translate from the current WP timezone.
-
 #### Replacing values on the edit events page
 The edit events template needs replacing with one that embeds the complete datetime data (details of how to do this are below). It then replaces in the same way as the calendar and events page.
 
@@ -52,12 +54,13 @@ The edit events template needs replacing with one that embeds the complete datet
 It assumes the WordPress timezone is set to London, and this default is in the code twice.
 
 ### Known bugs
- - In calendar view, if the timezone adjustment means a date change, this isn't honoured.
+ - In calendar view, if the timezone adjustment means a date change, this isn't honoured. However, it will add text to alert the user. 
  - Not all the BuddyPress and Events templates that might show times have been identified.
 
 ### Possible improvements to the plugin
  - We could probably grab the WordPress timezone and make it available to the JavaScript without requiring user configuration 
  - It's possible we could put the template overrides in this plugin folder, rather than the theme folder
+ - I have styled the output separately. Could include css here. 
 
 ## Installation
 ### 1. Install the relevant plugins
@@ -121,5 +124,4 @@ e.g. My tables/events.php template has this block in it:
             </td>
 ```
 ## Feedback
-
-Constructive feedback very welcome. This is my first real attempt at this sort of thing with JS and my first attempt at a WordPress plugin. How should I have structured this code better? etc.?
+Constructive feedback very welcome. 

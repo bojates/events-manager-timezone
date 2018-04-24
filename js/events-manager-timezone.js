@@ -6,6 +6,7 @@ jQuery(document).ready(function() {
   var defaultTimeZone = 'Europe/London'; // Should be the same as the WP timezone
   var displayDefaultTimeZone = 'London'; // The name of the timezone to appear on the events entry page.
 
+  // console.log('here');
   /*
     Functions using jQuery
   */
@@ -13,14 +14,13 @@ jQuery(document).ready(function() {
   // Assumes a 'timezone' is set
   var refreshTimes = (function() {
     // Find eventdatetimes - this is how we style our events
+    jQuery('.timesTranslate').remove();
     jQuery(".eventdatetime").each(function() {
 
       var dataStart = jQuery(this).data('eventstart').substring(0,19);
       var dataEnd = jQuery(this).data('eventend').substring(0,19);
+
       // Data for start and end is attached to the eventdatetimes class
-      // console.log(dataStart);
-      // console.log(dataEnd);
-      // console.log(defaultTimeZone);
       var eventStart = moment.tz(dataStart, defaultTimeZone);
       var eventEnd = moment.tz(dataEnd, defaultTimeZone);
 
@@ -32,11 +32,25 @@ jQuery(document).ready(function() {
       var displayDate = jQuery(this).find('.eventdates');
       var displayTime = jQuery(this).find('.eventtime');
 
+      // console.log(displayTime);
       // Format the date
+
       if (timezoneStart.isSame(timezoneEnd, 'day')) {
         var dateToDisplay = timezoneStart.format('D MMMM YY');
       } else {
         var dateToDisplay = timezoneStart.format('D MMMM YY') + ' - ' + timezoneEnd.format('D MMMM YY') ;
+      }
+
+      // console.log(eventStart.format('YYYY-MM-DD'));
+      // console.log(timezoneStart.format('YYYY-MM-DD'));
+      if (eventStart.isSame(timezoneStart.format('YYYY-MM-DD'), 'day')) {
+        var alertDateChange = '';
+      } else {
+        if (eventStart.isBefore(timezoneStart.format('YYYY-MM-DD'), 'day')) {
+          var alertDateChange = ' <strong>next day</strong>';
+        } else {
+          var alertDateChange = ' <strong>previous day</strong>';
+        }
       }
 
       // Format the time
@@ -44,15 +58,16 @@ jQuery(document).ready(function() {
         var timeToDisplay = timezoneStart.format('h:mm a z');
       // } else if ('0:00' == eventStart.tz('UTC').format('H:mm') && '23:59' == eventEnd.tz('UTC').format('H:mm')) {
       } else if ('0:00' == eventStart.format('H:mm') && '23:59' == eventEnd.format('H:mm')) {
-        var timeToDisplay = 'all day';
+        var timeToDisplay = 'all day' + alertDateChange;
       } else {
-        var timeToDisplay = timezoneStart.format('h:mm a') + ' - ' + timezoneEnd.format('h:mm a z');
+        var timeToDisplay = '<p class="timesTranslate"> [' + timezoneStart.format('h:mm a') + ' - ' + timezoneEnd.format('h:mm a z') + alertDateChange + ']</p>';
       }
 
       // Write the dates and time back to the page
-      displayDate.text(dateToDisplay);
-      displayTime.text(timeToDisplay);
 
+      displayDate.text(dateToDisplay);
+      displayTime.append(timeToDisplay);
+      // displayTime.append(alertDateChange);
       // Debug
       // console.log(timeDisplay);
     });
