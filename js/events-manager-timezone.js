@@ -31,7 +31,6 @@ jQuery(document).ready(function() {
   var defaultTimeZone = 'Europe/London'; // Should be the same as the WP timezone.
   var displayDefaultTimeZone = 'London'; // The name of the timezone to appear on the events entry page.
 
-  // console.log('here');
   /*
     Functions using jQuery
   */
@@ -56,17 +55,13 @@ jQuery(document).ready(function() {
       var displayDate = jQuery(this).find('.eventdates');
       var displayTime = jQuery(this).find('.eventtime');
 
-      // console.log(displayTime);
       // Format the date
-
       if (timezoneStart.isSame(timezoneEnd, 'day')) {
         var dateToDisplay = timezoneStart.format('D MMMM YY');
       } else {
         var dateToDisplay = timezoneStart.format('D MMMM YY') + ' - ' + timezoneEnd.format('D MMMM YY') ;
       }
 
-      // console.log(eventStart.format('YYYY-MM-DD'));
-      // console.log(timezoneStart.format('YYYY-MM-DD'));
       if (eventStart.isSame(timezoneStart.format('YYYY-MM-DD'), 'day')) {
         var alertDateChange = '';
       } else {
@@ -88,12 +83,8 @@ jQuery(document).ready(function() {
       }
 
       // Write the dates and time back to the page
-
       displayDate.text(dateToDisplay);
       displayTime.append(timeToDisplay);
-      // displayTime.append(alertDateChange);
-      // Debug
-      // console.log(timeDisplay);
     });
   });
 
